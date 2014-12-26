@@ -112,6 +112,11 @@ module.exports = function (data, opts) {
 			if(file.data){
 				_data = extend(_data, file.data);
 			}
+			if (options.template) {
+				Handlebars.registerPartial('content', fileContents);
+
+				fileContents = fs.readFileSync(options.template, 'utf8');
+			}
 			var template = Handlebars.compile(fileContents);
 			file.contents = new Buffer(template(_data));
 		} catch (err) {

@@ -103,3 +103,27 @@ it('should not require a default data object', function (cb) {
 	stream.end();
 
 });
+
+it('should compile Handlebars templates inside a main template', function (cb) {
+	var stream = template(
+		{
+			people: ['foo', 'bar'],
+			message: 'BAZ'
+		},
+		{
+			template: 'test_template.hbs', //'Top#{{> content}}#Bottom',
+			partials : { header : '<header/>' },
+			helpers : { toLower : function(str) { return str.toLowerCase(); } }
+		});
+
+	stream.on('data', function (data) {
+		assert.equal(data.contents.toString(), 'Top#<header/><li>foo</li><li>bar</li> baz#Bottom');
+		cb();
+	});
+
+	stream.write(new gutil.File({
+		contents: new Buffer('{{> header}}{{#each people}}<li>{{.}}</li>{{/each}} {{toLower message}}')
+	}));
+
+	stream.end();
+});
